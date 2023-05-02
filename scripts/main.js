@@ -1,105 +1,159 @@
 const searchForm = document.getElementById("top-search");
-searchForm.onsubmit = (ev) => {
-  console.log("submitted top-search with", ev);
+searchForm.onsubmit = async (ev) => {
   ev.preventDefault();
-  // https://stackoverflow.com/a/26892365/1449799
+
   const formData = new FormData(ev.target);
-  // console.log(formData)
-  // for (const pair of formData.entries()) {
-  //   console.log(`${pair[0]}, ${pair[1]}`);
-  // }
   const queryText = formData.get("query");
-  console.log("queryText", queryText);
 
-  const rhymeResultsPromise = getRhymes(queryText);
-  rhymeResultsPromise.then((rhymeResults) => {
-    const rhymeListItemsArray = rhymeResults.map(rhymObj2DOMObj);
-    console.log("rhymeListItemsArray", rhymeListItemsArray);
-    const rhymeResultsUL = document.getElementById("rhyme-results");
-    rhymeListItemsArray.forEach((rhymeLi) => {
-      rhymeResultsUL.appendChild(rhymeLi);
-    });
-  });
+  const moves = await getPokemonMoves(queryText);
+  displayPokemonMoves(moves);
 };
 
-// given a word (string), search for rhymes
-// https://rhymebrain.com/api.html#rhyme
-//  https://rhymebrain.com/talk?function=getRhymes&word=hello
-
-const getRhymes = (word) => {
-  console.log("attempting to get rhymes for", word);
-  return fetch(
-    `https://rhymebrain.com/talk?function=getRhymes&word=${word}`
-  ).then((resp) => resp.json());
-};
-
-const rhymObj2DOMObj = (rhymeObj) => {
-  //this should be an array where each element has a structure like
-  //
-  // "word": "no",
-  // "frequency": 28,
-  // "score": "300",
-  // "flags": "bc",
-  // "syllables": "1"
-  const rhymeListItem = document.createElement("li");
-  const rhymeButton = document.createElement("button");
-  rhymeButton.classList.add('btn')
-  rhymeButton.classList.add('btn-info')
-  rhymeButton.textContent = rhymeObj.word;
-  rhymeButton.onclick = searchForBook;
-  rhymeListItem.appendChild(rhymeButton);
-  return rhymeListItem;
-};
-
-const searchForBook = (ev) => {
-  const word = ev.target.textContent;
-  console.log("search for", word);
-  return fetch(`https://gutendex.com/books/?search=${word}`).then((r) =>
-    r.json()
-  ).then((bookResultsObj)=> {
-    // console.log(bookResultsObj.hasOwnProperty('results'))
-    const bookCardsArray = bookResultsObj.results.map(bookObj2DOMObj)
-    console.log("bookCardsArray", bookCardsArray);
-    const bookResultsElem = document.getElementById("book-results");
-    bookCardsArray.forEach(book=>bookResultsElem.appendChild(book))
-  })
-};
-
-const bookObj2DOMObj = (bookObj) => {
-  // {"id":70252,"title":"Threads gathered up : $b A sequel to \"Virgie's Inheritance\"","authors":[{"name":"Sheldon, Georgie, Mrs.","birth_year":1843,"death_year":1926}],"translators":[],"subjects":["American fiction -- 19th century"],"bookshelves":[],"languages":["en"],"copyright":false,"media_type":"Text","formats":{"image/jpeg":"https://www.gutenberg.org/cache/epub/70252/pg70252.cover.medium.jpg","application/rdf+xml":"https://www.gutenberg.org/ebooks/70252.rdf","text/plain":"https://www.gutenberg.org/ebooks/70252.txt.utf-8","application/x-mobipocket-ebook":"https://www.gutenberg.org/ebooks/70252.kf8.images","application/epub+zip":"https://www.gutenberg.org/ebooks/70252.epub3.images","text/html":"https://www.gutenberg.org/ebooks/70252.html.images","application/octet-stream":"https://www.gutenberg.org/files/70252/70252-0.zip","text/plain; charset=us-ascii":"https://www.gutenberg.org/files/70252/70252-0.txt"},"download_count":745},
-
-  // make a dom element
-  // add bookObj.title to the element
-  // return element
-
-  const bookCardDiv = document.createElement("div");
-  bookCardDiv.classList.add("card");
-
-  const bookCardBody = document.createElement("div");
-  bookCardBody.classList.add("card-body");
-
-  const titleElem = document.createElement("h5");
-  titleElem.textContent = bookObj.title;
-  bookCardBody.appendChild(titleElem);
-  const cardText = document.createElement("p");
-  cardText.textContent =
-    "Some quick example text to build on the card title and make up the bulk of the card's content.";
-  bookCardBody.appendChild(cardText);
-  if (bookObj?.formats?.["image/jpeg"]) {
-    const bookCardImg = document.createElement("img");
-    bookCardImg.classList.add("card-img-top");
-    bookCardImg.src = bookObj?.formats?.["image/jpeg"];
-    bookCardBody.appendChild(bookCardImg)
-  }
-  if (bookObj?.formats?.["text/plain"]) {
-    const bookTextLink = document.createElement("a");
-    bookTextLink.href = bookObj?.formats?.["text/plain"];
-    bookTextLink.classList.add("btn");
-    bookTextLink.classList.add("btn-primary");
-    bookTextLink.textContent = "Read It!";
-    bookCardBody.appendChild(bookTextLink);
-  }
-  bookCardDiv.appendChild(bookCardBody)
-  return bookCardDiv
+const getPokemonMoves = async (pokemonName) => {
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+  const data = await response.json();
   
+  const moveDetailsPromises = data.moves.map(async (moveObj) => {
+    const moveResponse = await fetch(moveObj.move.url);
+    const moveData = await moveResponse.json();
+    return moveData;
+  });
+
+  const moveDetails = await Promise.all(moveDetailsPromises);
+  return moveDetails;
 };
+
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+}
+
+function displayPokemonMoves(moves) {
+  const movesContainer = document.getElementById("moves-results");
+  movesContainer.innerHTML = ""; // Clear previous results
+
+  shuffleArray(moves); // Shuffle the moves array
+  const randomMoves = moves.slice(0, 6); // Get 6 random moves
+
+  randomMoves.forEach((moveObj) => {
+    const moveButton = document.createElement("button");
+    moveButton.textContent = `${moveObj.name}`;
+    moveButton.classList.add("btn");
+    moveButton.classList.add("btn-info");
+    moveButton.onclick = async () => {
+      const accessToken = await getSpotifyAccessToken();
+      searchForSongs(accessToken, moveObj.name);
+    };
+    movesContainer.appendChild(moveButton);
+  });
+}
+
+
+
+
+
+
+
+const playerObj2DOMObj = (playerObj) => {
+  const playerListItem = document.createElement("li");
+  const playerButton = document.createElement("button");
+  playerButton.classList.add('btn');
+  playerButton.classList.add('btn-info');
+  playerButton.textContent = `${playerObj.name} (${playerObj.position})`;
+  playerButton.onclick = searchForSong;
+  playerListItem.appendChild(playerButton);
+  return playerListItem;
+};
+
+
+
+  async function getSpotifyAccessToken(clientId, clientSecret) {
+    const authUrl = 'https://accounts.spotify.com/api/token';
+    const authString = btoa(`${clientId}:${clientSecret}`);
+    const authHeader = `Basic ${authString}`;
+  
+    try {
+      const response = await axios.post(authUrl, 'grant_type=client_credentials', {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': authHeader
+        }
+      });
+      return response.data.access_token;
+    } catch (error) {
+      console.error('Error obtaining Spotify access token:', error);
+      return null;
+    }
+  }
+
+const clientId = '29c47e634ac24fd5806399416987ff70';
+const clientSecret = '5b317c4d02a14996b40ba88511749453';
+
+async function getSpotifyAccessToken() {
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+    },
+    body: 'grant_type=client_credentials'
+  });
+
+  const data = await response.json();
+  return data.access_token;
+}
+
+
+// Search for songs with the player's first name using the Spotify API
+const getSongs = async (playerFirstName) => {
+    const response = await fetch(
+      `https://api.spotify.com/v1/search?q=${playerFirstName}&type=track&market=US`, {
+        headers: {
+          'Authorization': 'Bearer YOUR_SPOTIFY_API_KEY'
+        }
+      }
+    );
+    const data = await response.json();
+    return data.tracks.items;
+  };
+
+  async function searchForSongs(accessToken, query) {
+    const response = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+  
+    const data = await response.json();
+    console.log(data);
+  
+    // Call a function to display the results (e.g., displaySongs(data.tracks.items))
+    displaySongs(data.tracks.items);
+
+  }
+
+  function displaySongs(songs) {
+    const songList = document.getElementById("song-results");
+    songList.innerHTML = ""; // Clear previous results
+  
+    if (songs.length === 0) {
+      const noSongsMessage = document.createElement("p");
+      noSongsMessage.textContent = "No songs found for that player";
+      songList.appendChild(noSongsMessage);
+    } else {
+      const songUl = document.createElement("ul");
+      
+      songs.forEach(song => {
+        const songLi = document.createElement("li");
+        songLi.textContent = `${song.name} by ${song.artists[0].name}`;
+        songUl.appendChild(songLi);
+      });
+  
+      songList.appendChild(songUl);
+    }
+  }
+  
