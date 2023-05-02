@@ -68,6 +68,11 @@ function displayPokemonMoves(moves, name) {
     moveButton.textContent = `${moveObj.name}`;
     moveButton.classList.add("btn");
     moveButton.classList.add("btn-info");
+
+    const moveType = moveObj.type.name;
+    const moveTypeColor = getMoveTypeColor(moveType); 
+    moveButton.style.backgroundColor = moveTypeColor;
+
     moveButton.onclick = async () => {
       const accessToken = await getSpotifyAccessToken();
       searchForSongs(accessToken, moveObj.name);
@@ -208,5 +213,31 @@ const getSongs = async (playerFirstName) => {
   
       songList.appendChild(songUl);
     }
+  }
+  
+
+  function getMoveTypeColor(moveType) {
+    const typeColors = {
+      normal: 'grey',
+      fighting: 'red',
+      flying: 'light-blue',
+      poison: 'purple',
+      ground: 'brown',
+      rock: 'grey',
+      bug: 'green',
+      ghost: 'light-grey',
+      steel: 'silver',
+      fire: 'orange',
+      water: 'blue',
+      grass: 'green',
+      electric: 'yellow',
+      psychic: 'pink',
+      ice: 'light-blue',
+      dragon: 'purple',
+      dark: 'dark grey',
+      fairy: 'pink'
+    };
+  
+    return typeColors[moveType] || 'btn-secondary';
   }
   
