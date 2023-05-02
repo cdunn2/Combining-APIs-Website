@@ -238,6 +238,6 @@ const getSongs = async (playerFirstName) => {
       fairy: 'pink'
     };
   
-    return typeColors[moveType] || 'btn-secondary';
+    return typeColors[moveType] || 'grey';
   }
   
