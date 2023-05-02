@@ -3,7 +3,7 @@ searchForm.onsubmit = async (ev) => {
   ev.preventDefault();
 
   const formData = new FormData(ev.target);
-  const queryText = formData.get("query");
+  const queryText = formData.get("query").toLowerCase();
 
   try {
       const [moves, pokemon] = await Promise.all([
