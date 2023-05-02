@@ -5,9 +5,20 @@ searchForm.onsubmit = async (ev) => {
   const formData = new FormData(ev.target);
   const queryText = formData.get("query");
 
-  const moves = await getPokemonMoves(queryText);
-  displayPokemonMoves(moves);
+  const [moves, pokemon] = await Promise.all([
+    getPokemonMoves(queryText),
+    getPokemonData(queryText),
+  ]);
+  
+  displayPokemonMoves(moves, queryText);
+  displayPokemonImage(pokemon.sprites.front_default, pokemon.sprites.back_default, queryText)
 };
+
+async function getPokemonData(pokemonName) {
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+  const data = await response.json();
+  return data;
+}
 
 const getPokemonMoves = async (pokemonName) => {
   const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
@@ -19,9 +30,11 @@ const getPokemonMoves = async (pokemonName) => {
     return moveData;
   });
 
+
   const moveDetails = await Promise.all(moveDetailsPromises);
   return moveDetails;
 };
+
 
 
 function shuffleArray(array) {
@@ -31,7 +44,7 @@ function shuffleArray(array) {
   }
 }
 
-function displayPokemonMoves(moves) {
+function displayPokemonMoves(moves, name) {
   const movesContainer = document.getElementById("moves-results");
   movesContainer.innerHTML = ""; // Clear previous results
 
@@ -51,7 +64,35 @@ function displayPokemonMoves(moves) {
   });
 }
 
+function displayPokemonImage(pokemonFront, pokemonBack, name) {
+  const imageContainer = document.getElementById("image-results");
+  imageContainer.style.display = "flex"
+  imageContainer.style.justifyContent = "center";
 
+  // Check if there's already an image in the container
+  if (imageContainer.firstChild) {
+    imageContainer.removeChild(imageContainer.firstChild);
+    imageContainer.removeChild(imageContainer.firstChild);
+  }
+
+  // Create a new front image element and set its attributes
+  const frontImage = document.createElement("img");
+  frontImage.id = "pokemon-front"
+  frontImage.src = pokemonFront;
+  frontImage.alt = name + " front";
+  frontImage.style.maxWidth = "250px";
+
+  // Create a new front image element and set its attributes
+  const backImage = document.createElement("img");
+  backImage.id = "pokemon-back"
+  backImage.src = pokemonBack;
+  backImage.alt = name + " back";
+  backImage.style.maxWidth = "250px";
+
+  // Append the image element to the imageContainer
+  imageContainer.appendChild(frontImage);
+  imageContainer.appendChild(backImage);
+}
 
 
 
