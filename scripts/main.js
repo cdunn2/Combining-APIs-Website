@@ -5,13 +5,25 @@ searchForm.onsubmit = async (ev) => {
   const formData = new FormData(ev.target);
   const queryText = formData.get("query");
 
-  const [moves, pokemon] = await Promise.all([
-    getPokemonMoves(queryText),
-    getPokemonData(queryText),
-  ]);
+  try {
+      const [moves, pokemon] = await Promise.all([
+      getPokemonMoves(queryText),
+      getPokemonData(queryText),
+    ]);
   
-  displayPokemonMoves(moves, queryText);
-  displayPokemonImage(pokemon.sprites.front_default, pokemon.sprites.back_default, queryText)
+    displayPokemonMoves(moves, queryText);
+    displayPokemonImage(pokemon.sprites.front_default, pokemon.sprites.back_default, queryText);
+  } catch (error) {
+    const imageContainer = document.getElementById("image-results");
+    const movesContainer = document.getElementById("moves-results");
+    const songsContainer = document.getElementById("song-results");
+
+    imageContainer.innerHTML = "";
+    movesContainer.innerHTML = "";
+    songsContainer.innerHTML = "";
+
+    alert("404 Error: Pokemon not found");
+  }
 };
 
 async function getPokemonData(pokemonName) {
