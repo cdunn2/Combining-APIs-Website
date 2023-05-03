@@ -53,16 +53,16 @@ const getPokemonMoves = async (pokemonName) => {
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    [array[i], array[j]] = [array[j], array[i]]; 
   }
 }
 
 function displayPokemonMoves(moves, name) {
   const movesContainer = document.getElementById("moves-results");
-  movesContainer.innerHTML = ""; // Clear previous results
+  movesContainer.innerHTML = ""; 
 
-  shuffleArray(moves); // Shuffle the moves array
-  const randomMoves = moves.slice(0, 6); // Get 6 random moves
+  shuffleArray(moves); 
+  const randomMoves = moves.slice(0, 6); 
 
   randomMoves.forEach((moveObj) => {
     const moveButton = document.createElement("button");
@@ -133,23 +133,6 @@ function displayPokemonImage(pokemonFront, pokemonBack, name) {
   imageContainer.appendChild(backImage);
 }
 
-
-
-
-
-const playerObj2DOMObj = (playerObj) => {
-  const playerListItem = document.createElement("li");
-  const playerButton = document.createElement("button");
-  playerButton.classList.add('btn');
-  playerButton.classList.add('btn-info');
-  playerButton.textContent = `${playerObj.name} (${playerObj.position})`;
-  playerButton.onclick = searchForSong;
-  playerListItem.appendChild(playerButton);
-  return playerListItem;
-};
-
-
-
   async function getSpotifyAccessToken(clientId, clientSecret) {
     const authUrl = 'https://accounts.spotify.com/api/token';
     const authString = btoa(`${clientId}:${clientSecret}`);
@@ -186,8 +169,8 @@ async function getSpotifyAccessToken() {
   return data.access_token;
 }
 
+let sortAlphabetically = false;
 
-// Search for songs with the player's first name using the Spotify API
 const getSongs = async (playerFirstName) => {
     const response = await fetch(
       `https://api.spotify.com/v1/search?q=${playerFirstName}&type=track&market=US`, {
@@ -211,20 +194,22 @@ const getSongs = async (playerFirstName) => {
     const data = await response.json();
     console.log(data);
   
-    // Call a function to display the results (e.g., displaySongs(data.tracks.items))
     displaySongs(data.tracks.items);
 
   }
 
   async function displaySongs(songs) {
-    const songList = document.getElementById("song-results");
+    displayedSongs = songs;
+    const songList = document.getElementById("song-list");
     songList.innerHTML = ""; // Clear previous results
   
     if (songs.length === 0) {
       const noSongsMessage = document.createElement("p");
       noSongsMessage.textContent = "No songs found for that player";
       songList.appendChild(noSongsMessage);
+      sortButton.style.display = "none";
     } else {
+      sortButton.style.display = "inline-block";
       const songUl = document.createElement("ul");
       
       songs.forEach(song => {
@@ -239,7 +224,6 @@ const getSongs = async (playerFirstName) => {
       songList.appendChild(songUl);
     }
   }
-  
   
 
   function getMoveTypeColor(moveType) {
@@ -266,4 +250,23 @@ const getSongs = async (playerFirstName) => {
   
     return typeColors[moveType] || 'grey';
   }
-  
+
+  let sorted = false;
+
+  function sortSongsAlphabetically(songs) {
+    if (!sorted) {
+      sorted = !sorted;
+      return songs.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      sorted = !sorted;
+      return songs.sort((a, b) => b.name.localeCompare(a.name));
+    }
+  }
+
+  const sortButton = document.getElementById("sort-alphabetically");
+  let displayedSongs = [];
+
+  sortButton.addEventListener("click", () => {
+    displayedSongs = sortSongsAlphabetically(displayedSongs);
+    displaySongs(displayedSongs);
+  });
