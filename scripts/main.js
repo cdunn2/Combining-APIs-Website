@@ -79,7 +79,6 @@ function displayPokemonMoves(moves, name) {
     moveButton.onclick = async () => {
       // obtain the move-used div
       const moveUsedContainer = document.getElementById("display-move-used");
-      moveUsedContainer.style.marginLeft = "6vw";
       if (moveUsedContainer.firstChild) {
         moveUsedContainer.removeChild(moveUsedContainer.firstChild);
       }

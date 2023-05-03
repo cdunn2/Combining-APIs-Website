@@ -15,3 +15,7 @@
   justify-content: center;
   align-items: center;
 }
+
+#display-move-used {
+  margin-left: 6vw;
+}
