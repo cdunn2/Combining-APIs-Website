@@ -10,7 +10,8 @@ searchForm.onsubmit = async (ev) => {
       getPokemonMoves(queryText),
       getPokemonData(queryText),
     ]);
-  
+    
+
     displayPokemonMoves(moves, queryText);
     displayPokemonImage(pokemon.sprites.front_default, pokemon.sprites.back_default, queryText);
   } catch (error) {
@@ -76,9 +77,30 @@ function displayPokemonMoves(moves, name) {
     moveButton.onclick = async () => {
       const accessToken = await getSpotifyAccessToken();
       searchForSongs(accessToken, moveObj.name);
+
+
+
     };
     movesContainer.appendChild(moveButton);
   });
+}
+
+const searchSong = async (songName) => {
+
+  const apiUrl = `https://api.spotify.com/v1/search?q=${songName}&type=track`;
+  const authString = btoa(`${clientId}:${clientSecret}`);
+  const authHeader = `Basic ${authString}`;
+  
+  const response = await fetch(apiUrl, {
+    headers: {
+      'Authorization': 'Bearer ' + authHeader
+    }
+  });
+  const data = await response.json();
+  const spotifyId = data.tracks.items[0].id;
+  const songLink = `https://open.spotify.com/track/${spotifyId}`;
+
+  return songLink;
 }
 
 function displayPokemonImage(pokemonFront, pokemonBack, name) {
@@ -194,7 +216,7 @@ const getSongs = async (playerFirstName) => {
 
   }
 
-  function displaySongs(songs) {
+  async function displaySongs(songs) {
     const songList = document.getElementById("song-results");
     songList.innerHTML = ""; // Clear previous results
   
@@ -207,13 +229,17 @@ const getSongs = async (playerFirstName) => {
       
       songs.forEach(song => {
         const songLi = document.createElement("li");
-        songLi.textContent = `${song.name} by ${song.artists[0].name}`;
+        const songLink = document.createElement("a");
+        songLink.href = song.external_urls.spotify;
+        songLink.textContent = `${song.name} by ${song.artists[0].name}`;
+        songLi.appendChild(songLink);
         songUl.appendChild(songLi);
       });
   
       songList.appendChild(songUl);
     }
   }
+  
   
 
   function getMoveTypeColor(moveType) {
