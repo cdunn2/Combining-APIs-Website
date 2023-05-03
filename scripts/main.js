@@ -18,10 +18,12 @@ searchForm.onsubmit = async (ev) => {
     const imageContainer = document.getElementById("image-results");
     const movesContainer = document.getElementById("moves-results");
     const songsContainer = document.getElementById("song-results");
+    const moveUsedContainer = document.getElementById("display-move-used");
 
     imageContainer.innerHTML = "";
     movesContainer.innerHTML = "";
     songsContainer.innerHTML = "";
+    moveUsedContainer.innerHTML = "";
 
     alert("404 Error: Pokemon not found");
   }
@@ -75,6 +77,20 @@ function displayPokemonMoves(moves, name) {
     moveButton.style.backgroundColor = moveTypeColor;
 
     moveButton.onclick = async () => {
+      // obtain the move-used div
+      const moveUsedContainer = document.getElementById("display-move-used");
+      moveUsedContainer.style.marginLeft = "6vw";
+      if (moveUsedContainer.firstChild) {
+        moveUsedContainer.removeChild(moveUsedContainer.firstChild);
+      }
+      // create a new move used message
+      const moveUsedMessage = document.createElement("h3")
+      // change the text of move usedd message
+      moveUsedMessage.innerText = name + " used " + moveObj.name + "!";
+      moveUsedMessage.style.fontStyle = "italic";
+      // append moveUsedMessage to the move Used
+      moveUsedContainer.appendChild(moveUsedMessage);
+
       const accessToken = await getSpotifyAccessToken();
       searchForSongs(accessToken, moveObj.name);
 
