@@ -53,16 +53,16 @@ const getPokemonMoves = async (pokemonName) => {
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    [array[i], array[j]] = [array[j], array[i]]; 
   }
 }
 
 function displayPokemonMoves(moves, name) {
   const movesContainer = document.getElementById("moves-results");
-  movesContainer.innerHTML = ""; // Clear previous results
+  movesContainer.innerHTML = ""; 
 
-  shuffleArray(moves); // Shuffle the moves array
-  const randomMoves = moves.slice(0, 6); // Get 6 random moves
+  shuffleArray(moves); 
+  const randomMoves = moves.slice(0, 6); 
 
   randomMoves.forEach((moveObj) => {
     const moveButton = document.createElement("button");
@@ -170,7 +170,7 @@ async function getSpotifyAccessToken() {
 }
 
 let sortAlphabetically = false;
-// Search for songs with the player's first name using the Spotify API
+
 const getSongs = async (playerFirstName) => {
     const response = await fetch(
       `https://api.spotify.com/v1/search?q=${playerFirstName}&type=track&market=US`, {
@@ -194,7 +194,6 @@ const getSongs = async (playerFirstName) => {
     const data = await response.json();
     console.log(data);
   
-    // Call a function to display the results (e.g., displaySongs(data.tracks.items))
     displaySongs(data.tracks.items);
 
   }
@@ -252,8 +251,16 @@ const getSongs = async (playerFirstName) => {
     return typeColors[moveType] || 'grey';
   }
 
+  let sorted = false;
+
   function sortSongsAlphabetically(songs) {
-    return songs.sort((a, b) => a.name.localeCompare(b.name));
+    if (!sorted) {
+      sorted = !sorted;
+      return songs.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      sorted = !sorted;
+      return songs.sort((a, b) => b.name.localeCompare(a.name));
+    }
   }
 
   const sortButton = document.getElementById("sort-alphabetically");
@@ -263,4 +270,3 @@ const getSongs = async (playerFirstName) => {
     displayedSongs = sortSongsAlphabetically(displayedSongs);
     displaySongs(displayedSongs);
   });
-
