@@ -133,23 +133,6 @@ function displayPokemonImage(pokemonFront, pokemonBack, name) {
   imageContainer.appendChild(backImage);
 }
 
-
-
-
-
-const playerObj2DOMObj = (playerObj) => {
-  const playerListItem = document.createElement("li");
-  const playerButton = document.createElement("button");
-  playerButton.classList.add('btn');
-  playerButton.classList.add('btn-info');
-  playerButton.textContent = `${playerObj.name} (${playerObj.position})`;
-  playerButton.onclick = searchForSong;
-  playerListItem.appendChild(playerButton);
-  return playerListItem;
-};
-
-
-
   async function getSpotifyAccessToken(clientId, clientSecret) {
     const authUrl = 'https://accounts.spotify.com/api/token';
     const authString = btoa(`${clientId}:${clientSecret}`);
@@ -186,7 +169,7 @@ async function getSpotifyAccessToken() {
   return data.access_token;
 }
 
-
+let sortAlphabetically = false;
 // Search for songs with the player's first name using the Spotify API
 const getSongs = async (playerFirstName) => {
     const response = await fetch(
@@ -217,14 +200,17 @@ const getSongs = async (playerFirstName) => {
   }
 
   async function displaySongs(songs) {
-    const songList = document.getElementById("song-results");
+    displayedSongs = songs;
+    const songList = document.getElementById("song-list");
     songList.innerHTML = ""; // Clear previous results
   
     if (songs.length === 0) {
       const noSongsMessage = document.createElement("p");
       noSongsMessage.textContent = "No songs found for that player";
       songList.appendChild(noSongsMessage);
+      sortButton.style.display = "none";
     } else {
+      sortButton.style.display = "inline-block";
       const songUl = document.createElement("ul");
       
       songs.forEach(song => {
@@ -239,7 +225,6 @@ const getSongs = async (playerFirstName) => {
       songList.appendChild(songUl);
     }
   }
-  
   
 
   function getMoveTypeColor(moveType) {
@@ -266,4 +251,16 @@ const getSongs = async (playerFirstName) => {
   
     return typeColors[moveType] || 'grey';
   }
-  
+
+  function sortSongsAlphabetically(songs) {
+    return songs.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  const sortButton = document.getElementById("sort-alphabetically");
+  let displayedSongs = [];
+
+  sortButton.addEventListener("click", () => {
+    displayedSongs = sortSongsAlphabetically(displayedSongs);
+    displaySongs(displayedSongs);
+  });
+
