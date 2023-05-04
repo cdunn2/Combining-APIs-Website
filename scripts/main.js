@@ -17,13 +17,15 @@ searchForm.onsubmit = async (ev) => {
   } catch (error) {
     const imageContainer = document.getElementById("image-results");
     const movesContainer = document.getElementById("moves-results");
-    const songsContainer = document.getElementById("song-results");
+    const songsContainer = document.getElementById("song-list");
+    const button = document.getElementById("sort-alphabetically");
     const moveUsedContainer = document.getElementById("display-move-used");
 
     imageContainer.innerHTML = "";
     movesContainer.innerHTML = "";
     songsContainer.innerHTML = "";
     moveUsedContainer.innerHTML = "";
+    button.style.display = "none";
 
     alert("404 Error: Pokemon not found");
   }
